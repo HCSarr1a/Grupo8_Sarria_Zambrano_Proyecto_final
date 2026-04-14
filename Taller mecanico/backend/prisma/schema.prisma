@@ -1,0 +1,58 @@
+// Configuración para Prisma 7.7.0
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // La URL se lee automáticamente desde prisma.config.ts
+}
+
+// --- MODELOS DEL TALLER ---
+
+model Cliente {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  cedula    String     @unique
+  telefono  String?    // Opcional por si no lo tienen a la mano
+  vehiculos Vehiculo[]
+}
+
+model Vehiculo {
+  id        Int      @id @default(autoincrement())
+  placa     String   @unique
+  marca     String
+  modelo    String
+  año       Int?     // Opcional
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  ordenes   Orden[]
+}
+
+model Mecanico {
+  id      Int     @id @default(autoincrement())
+  nombre  String
+  ordenes Orden[]
+}
+
+model Orden {
+  id          Int       @id @default(autoincrement())
+  descripcion String
+  estado      String    @default("RECIBIDO") 
+  total       Float     @default(0) // Campo clave para visibilidad de costos
+  fecha       DateTime  @default(now())
+  vehiculo    Vehiculo  @relation(fields: [vehiculoId], references: [id])
+  vehiculoId  Int
+  mecanico    Mecanico  @relation(fields: [mecanicoId], references: [id])
+  mecanicoId  Int
+  repuestos   RepuestoUsado[]
+}
+
+model RepuestoUsado {
+  id          Int    @id @default(autoincrement())
+  nombre      String
+  cantidad    Int
+  precioUnit  Float
+  orden       Orden  @relation(fields: [ordenId], references: [id])
+  ordenId     Int
+}
