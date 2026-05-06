@@ -1,157 +1,160 @@
 "use client";
+
 import { useState } from "react";
+import Link from "next/link";
 
-export default function TallerDigital() {
-  const [paso, setPaso] = useState("RECEPCION");
-  const [cargando, setCargando] = useState(false);
-  const [orden, setOrden] = useState({
-    placa: "",
-    cliente: "",
-    cedula: "",
-    modelo: "",
-    mecanico: "1",
-    problema: "",
-    manoObra: 0,
-    repuestos: [] as any[],
+export default function Home() {
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    telefono: "",
+    vehiculo: "",
+    fecha: "",
+    descripcion: "",
   });
+  const [enviado, setEnviado] = useState(false);
 
-  const verificarVehiculo = async (placa: string) => {
-    if (placa.length < 5) return;
-    setCargando(true);
-    try {
-      const res = await fetch(`http://localhost:3001/ordenes/vehiculo/${placa.toUpperCase()}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.length > 0) {
-          const ultima = data[0];
-          setOrden({
-            ...orden,
-            placa: ultima.vehiculo.placa,
-            cliente: ultima.vehiculo.cliente.nombre,
-            cedula: ultima.vehiculo.cliente.cedula,
-            modelo: ultima.vehiculo.modelo,
-          });
-        }
-      }
-    } catch (e) { console.log("Vehículo nuevo"); }
-    finally { setCargando(false); }
-  };
-
-  const agregarRepuesto = (nombre: string, precio: number) => {
-    setOrden({
-      ...orden,
-      repuestos: [...orden.repuestos, { nombre, precio, cantidad: 1 }]
-    });
-  };
-
-  const calcularTotal = () => {
-    const totalRepuestos = orden.repuestos.reduce((acc, r) => acc + (r.precio * r.cantidad), 0);
-    return totalRepuestos + Number(orden.manoObra);
-  };
-
-  const finalizarOrden = async () => {
-    setCargando(true);
-    try {
-      const res = await fetch('http://localhost:3001/ordenes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...orden, total: calcularTotal() })
-      });
-      if (res.ok) setPaso("CIERRE");
-    } catch (e) { alert("Error de conexión con el Backend"); }
-    finally { setCargando(false); }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Aquí luego podemos conectar con el backend
+    console.log("Cita agendada:", formData);
+    setEnviado(true);
+    
+    setTimeout(() => {
+      setShowModal(false);
+      setEnviado(false);
+      setFormData({ nombre: "", telefono: "", vehiculo: "", fecha: "", descripcion: "" });
+    }, 1800);
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8 font-sans">
-      <header className="mb-10 border-b border-slate-800 pb-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-orange-500">Gestión de Taller Automotriz</h1>
-          <p className="text-slate-400">Control de Reparaciones y Suministros</p>
+    <div className="min-h-screen bg-slate-950">
+      {/* Hero */}
+      <div className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+        <div className="inline-block bg-orange-600/10 text-orange-400 px-4 py-1 rounded-full text-sm font-medium mb-6">
+          Neiva • Huila
         </div>
-        <div className="bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 font-mono text-orange-300">
-          FASE: {paso}
+        <h1 className="text-6xl font-bold tracking-tighter mb-4">
+          Tu vehículo en <span className="text-orange-500">buenas manos</span>
+        </h1>
+        <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+          Servicio profesional, repuestos de calidad y atención personalizada. 
+          Agenda tu cita en segundos.
+        </p>
+      </div>
+
+      {/* Opciones principales */}
+      <div className="max-w-6xl mx-auto px-6 pb-24">
+        <div className="grid md:grid-cols-3 gap-6">
+          
+          {/* Agendar Cita */}
+          <div 
+            onClick={() => setShowModal(true)}
+            className="group bg-slate-900 border border-slate-800 hover:border-orange-500/50 rounded-3xl p-8 cursor-pointer transition-all active:scale-[0.985]"
+          >
+            <div className="w-14 h-14 bg-orange-600/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600/20 transition">
+              <span className="text-4xl">📅</span>
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">Agendar Cita</h3>
+            <p className="text-slate-400 mb-6">Reserva tu turno de forma rápida y sencilla. Elige el día y hora que más te convenga.</p>
+            <div className="text-orange-500 font-semibold flex items-center gap-2 group-hover:gap-3 transition">
+              Agendar ahora <span>→</span>
+            </div>
+          </div>
+
+          {/* Hablar con Asesor */}
+          <a 
+            href="tel:+573054778434"
+            className="group bg-slate-900 border border-slate-800 hover:border-orange-500/50 rounded-3xl p-8 transition-all active:scale-[0.985] block"
+          >
+            <div className="w-14 h-14 bg-blue-600/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-blue-600/20 transition">
+              <span className="text-4xl">📞</span>
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">Hablar con un Asesor</h3>
+            <p className="text-slate-400 mb-6">¿Tienes dudas? Llámanos directamente y te atendemos de inmediato.</p>
+            <div className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-2xl transition">
+              Marca aquí → 305 477 8434
+            </div>
+          </a>
+
+          {/* Repuestos */}
+          <Link 
+            href="/repuestos"
+            className="group bg-slate-900 border border-slate-800 hover:border-orange-500/50 rounded-3xl p-8 transition-all active:scale-[0.985] block"
+          >
+            <div className="w-14 h-14 bg-emerald-600/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-600/20 transition">
+              <span className="text-4xl">🔧</span>
+            </div>
+            <h3 className="text-2xl font-semibold mb-3">Repuestos</h3>
+            <p className="text-slate-400 mb-6">Explora nuestro catálogo de repuestos originales para motos y carros.</p>
+            <div className="text-emerald-500 font-semibold flex items-center gap-2 group-hover:gap-3 transition">
+              Ver catálogo <span>→</span>
+            </div>
+          </Link>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-4xl mx-auto bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-2xl">
-        {paso === "RECEPCION" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold border-l-4 border-orange-500 pl-3">1. Datos del Vehículo</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <input type="text" placeholder="PLACA" className="bg-slate-800 p-3 rounded-lg border border-slate-700 uppercase focus:border-orange-500 outline-none" 
-                value={orden.placa} onChange={(e) => setOrden({...orden, placa: e.target.value.toUpperCase()})} onBlur={() => verificarVehiculo(orden.placa)} />
-              <input type="text" placeholder="CLIENTE" className="bg-slate-800 p-3 rounded-lg border border-slate-700" 
-                value={orden.cliente} onChange={(e) => setOrden({...orden, cliente: e.target.value})} />
-              <input type="text" placeholder="CÉDULA" className="bg-slate-800 p-3 rounded-lg border border-slate-700" 
-                value={orden.cedula} onChange={(e) => setOrden({...orden, cedula: e.target.value})} />
-              <input type="text" placeholder="MARCA/MODELO" className="bg-slate-800 p-3 rounded-lg border border-slate-700" 
-                value={orden.modelo} onChange={(e) => setOrden({...orden, modelo: e.target.value})} />
-            </div>
-            <textarea placeholder="Descripción del problema..." className="w-full bg-slate-800 p-3 rounded-lg border border-slate-700 h-24" 
-              onChange={(e) => setOrden({...orden, problema: e.target.value})} />
-            <button onClick={() => setPaso("TALLER")} className="w-full bg-orange-600 hover:bg-orange-500 py-3 rounded-lg font-bold">Iniciar Orden</button>
-          </div>
-        )}
+      {/* Modal Agendar Cita */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-md p-8 relative">
+            <button 
+              onClick={() => setShowModal(false)} 
+              className="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl"
+            >
+              ×
+            </button>
 
-        {paso === "TALLER" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold border-l-4 border-blue-500 pl-3">2. Hoja de Trabajo: {orden.placa}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-800 p-4 rounded-lg">
-                <p className="text-xs text-slate-500 uppercase">Falla</p>
-                <p className="text-sm">{orden.problema || "Sin descripción"}</p>
-              </div>
-              <div className="bg-slate-800 p-4 rounded-lg">
-                <label className="text-xs text-slate-500 block mb-1">MANO DE OBRA ($)</label>
-                <input type="number" className="bg-slate-700 w-full p-2 rounded border border-slate-600 text-orange-400 font-mono" 
-                  onChange={(e) => setOrden({...orden, manoObra: Number(e.target.value)})} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-sm font-bold text-slate-400">Insumos:</p>
-              <div className="flex gap-2">
-                <button onClick={() => agregarRepuesto("Aceite", 45000)} className="bg-slate-700 px-4 py-2 rounded-full text-xs hover:bg-orange-500 transition">+ Aceite</button>
-                <button onClick={() => agregarRepuesto("Pastillas", 38000)} className="bg-slate-700 px-4 py-2 rounded-full text-xs hover:bg-orange-500 transition">+ Pastillas</button>
-                <button onClick={() => agregarRepuesto("Kit Arrastre", 180000)} className="bg-slate-700 px-4 py-2 rounded-full text-xs hover:bg-orange-500 transition">+ Kit Arrastre</button>
-              </div>
-            </div>
-            <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-800">
-              <table className="w-full text-sm">
-                <thead><tr className="text-slate-500 border-b border-slate-700"><th className="pb-2 text-left">Ítem</th><th className="pb-2 text-right">Precio</th></tr></thead>
-                <tbody>
-                  {orden.repuestos.map((r, i) => (
-                    <tr key={i}><td className="py-1 text-slate-300">{r.nombre}</td><td className="text-right font-mono">${r.precio.toLocaleString()}</td></tr>
-                  ))}
-                  <tr><td className="pt-4 font-bold text-orange-400">TOTAL ESTIMADO</td><td className="pt-4 text-right text-xl font-bold text-orange-400">${calcularTotal().toLocaleString()}</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <button onClick={finalizarOrden} className="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">Finalizar Reparación</button>
-          </div>
-        )}
+            {!enviado ? (
+              <>
+                <h2 className="text-3xl font-bold mb-2">Agendar Cita</h2>
+                <p className="text-slate-400 mb-8">Completa el formulario y te contactaremos para confirmar.</p>
 
-        {paso === "CIERRE" && (
-          <div className="text-center space-y-6 py-10 animate-in fade-in zoom-in duration-300">
-            <div className="text-5xl">📄</div>
-            <h2 className="text-3xl font-bold text-green-400">¡Orden Exitosa!</h2>
-            <div className="max-w-md mx-auto text-left bg-white text-slate-900 p-8 rounded-lg shadow-2xl font-mono text-sm border-t-8 border-orange-500">
-              <p className="text-center font-bold text-lg mb-4">RECIBO DE SERVICIO</p>
-              <p>PLACA: {orden.placa}</p>
-              <p>CLIENTE: {orden.cliente}</p>
-              <div className="border-t border-dashed border-slate-300 my-4"></div>
-              {orden.repuestos.map((r, i) => (
-                <div key={i} className="flex justify-between"><span>{r.nombre}</span><span>${r.precio.toLocaleString()}</span></div>
-              ))}
-              <div className="flex justify-between"><span>Mano de Obra</span><span>${orden.manoObra.toLocaleString()}</span></div>
-              <div className="border-t border-slate-900 mt-4 pt-2 flex justify-between font-bold text-lg">
-                <span>TOTAL:</span><span>${calcularTotal().toLocaleString()}</span>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <input 
+                    type="text" placeholder="Tu nombre completo" required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 focus:border-orange-500 outline-none"
+                    value={formData.nombre} onChange={(e) => setFormData({...formData, nombre: e.target.value})} 
+                  />
+                  <input 
+                    type="tel" placeholder="Tu teléfono" required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 focus:border-orange-500 outline-none"
+                    value={formData.telefono} onChange={(e) => setFormData({...formData, telefono: e.target.value})} 
+                  />
+                  <input 
+                    type="text" placeholder="Placa o modelo del vehículo" required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 focus:border-orange-500 outline-none"
+                    value={formData.vehiculo} onChange={(e) => setFormData({...formData, vehiculo: e.target.value})} 
+                  />
+                  <input 
+                    type="date" required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 focus:border-orange-500 outline-none"
+                    value={formData.fecha} onChange={(e) => setFormData({...formData, fecha: e.target.value})} 
+                  />
+                  <textarea 
+                    placeholder="¿Qué servicio necesitas?" rows={3} required
+                    className="w-full bg-slate-800 border border-slate-700 rounded-2xl px-5 py-3.5 focus:border-orange-500 outline-none resize-y"
+                    value={formData.descripcion} onChange={(e) => setFormData({...formData, descripcion: e.target.value})} 
+                  />
+
+                  <button 
+                    type="submit"
+                    className="w-full bg-orange-600 hover:bg-orange-500 py-4 rounded-2xl font-bold text-lg mt-2 transition"
+                  >
+                    Confirmar Cita
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-10">
+                <div className="text-6xl mb-4">✅</div>
+                <h3 className="text-2xl font-bold text-green-400 mb-2">¡Cita agendada!</h3>
+                <p className="text-slate-400">Nos pondremos en contacto contigo muy pronto para confirmar.</p>
               </div>
-            </div>
-            <button onClick={() => window.location.reload()} className="bg-orange-600 px-8 py-3 rounded-lg font-bold hover:bg-orange-500 transition">Nueva Orden</button>
+            )}
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
